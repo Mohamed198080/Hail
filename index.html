@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نموذج تسجيل الأنشطة التجارية - مع الإحداثيات</title>
+    <title>تسجيل الأنشطة التجارية </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
@@ -221,7 +221,7 @@
     <div class="container">
         <h2>
             <i class="fas fa-clipboard-list"></i>
-            نموذج تسجيل النشاط التجاري
+            تسجيل النشاط التجارى(حائل)
         </h2>
 
         <form id="dataForm">
@@ -266,13 +266,7 @@
                     <label><i class="fas fa-file-alt"></i> رخصة النشاط التجاري</label>
                     <input type="text" id="license" name="license" placeholder="رقم الترخيص">
                 </div>
-
-                <!-- الاحتياجات (في حال لا يوجد عداد) -->
-                <div class="form-group">
-                    <label><i class="fas fa-tools"></i> الاحتياجات (في حال لا يوجد عداد)</label>
-                    <input type="text" id="needs" name="needs" placeholder="مثال: عداد كهرباء جديد">
-                </div>
-
+                
                 <!-- خط العرض -->
                 <div class="form-group">
                     <label><i class="fas fa-map-pin"></i> خط العرض (Latitude)</label>
@@ -484,7 +478,7 @@
             }
 
             // استبدل هذا الرابط بالرابط الذي حصلت عليه من Apps Script (ينتهي بـ /exec)
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbwFA2RWdZ6893VqsLcjbGaOaanfJG_ujUAFen5u4WkQSdytVX_pzz0HAgzIHLWb7IcM/exec'; // ⬅️ ضع الرابط الصحيح هنا
+            const scriptURL = 'https://script.google.com/macros/s/AKfycby_TFwFYiHVy0w0r-JC2fJEqPMfIoSnAL9f9y4Bh0Qf-n-4hDk43jnC3Lqy1ih6n0GF/exec'; // ⬅️ ضع الرابط الصحيح هنا
 
             try {
                 const response = await fetch(scriptURL, {
