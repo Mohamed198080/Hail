@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل النشاط التجارى (حائل)</title>
+    <title>نموذج تسجيل الأنشطة التجارية - مع الإحداثيات</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
@@ -207,7 +207,6 @@
             grid-column: span 2;
         }
 
-        /* استجابة للشاشات الصغيرة */
         @media (max-width: 600px) {
             .form-grid {
                 grid-template-columns: 1fr;
@@ -222,7 +221,7 @@
     <div class="container">
         <h2>
             <i class="fas fa-clipboard-list"></i>
-            تسجيل النشاط التجارى (مدينة حائل)
+            نموذج تسجيل النشاط التجاري
         </h2>
 
         <form id="dataForm">
@@ -274,19 +273,19 @@
                     <input type="text" id="needs" name="needs" placeholder="مثال: عداد كهرباء جديد">
                 </div>
 
-                <!-- حقل خط العرض (نصف العرض) -->
+                <!-- خط العرض -->
                 <div class="form-group">
                     <label><i class="fas fa-map-pin"></i> خط العرض (Latitude)</label>
                     <input type="text" id="latitude" name="latitude" placeholder="مثال: 24.7136" readonly>
                 </div>
 
-                <!-- حقل خط الطول (نصف العرض) -->
+                <!-- خط الطول -->
                 <div class="form-group">
                     <label><i class="fas fa-map-pin"></i> خط الطول (Longitude)</label>
                     <input type="text" id="longitude" name="longitude" placeholder="مثال: 46.6753" readonly>
                 </div>
 
-                <!-- زر جلب الموقع (كامل العرض) -->
+                <!-- زر جلب الموقع -->
                 <div class="form-group full-width">
                     <button type="button" class="location-btn" id="getLocationBtn">
                         <i class="fas fa-location-dot"></i> جلب الموقع الحالي (بدقة أقل من 10 أمتار)
@@ -296,7 +295,7 @@
                     </div>
                 </div>
 
-                <!-- الملاحظات - كامل العرض -->
+                <!-- الملاحظات -->
                 <div class="form-group full-width">
                     <label><i class="fas fa-pen"></i> الملاحظات</label>
                     <textarea id="notes" name="notes" placeholder="أي ملاحظات إضافية..."></textarea>
@@ -313,7 +312,7 @@
     </div>
 
     <script>
-        // ----- تعريف التصنيفات الرئيسية والفرعية -----
+        // ----- التصنيفات -----
         const categories = {
             "السياحة والضيافة والترفيه والتسلية": [
                 "الأندية الرياضية ( كرة قدم - بادل )",
@@ -354,7 +353,7 @@
             ]
         };
 
-        // ----- تعبئة قائمة التصنيف الرئيسي -----
+        // تعبئة التصنيف الرئيسي
         const mainCategorySelect = document.getElementById('mainCategory');
         for (let mainCat in categories) {
             const option = document.createElement('option');
@@ -365,7 +364,6 @@
 
         const subcategorySelect = document.getElementById('subcategory');
 
-        // ----- عند تغيير التصنيف الرئيسي، نحدث قائمة التصنيف الفرعي -----
         mainCategorySelect.addEventListener('change', function() {
             const selectedMain = this.value;
             subcategorySelect.innerHTML = '';
@@ -390,7 +388,7 @@
             }
         });
 
-        // ----- الحصول على الموقع الجغرافي بدقة عالية -----
+        // ----- الموقع الجغرافي -----
         const latitudeInput = document.getElementById('latitude');
         const longitudeInput = document.getElementById('longitude');
         const locationStatus = document.getElementById('locationStatus');
@@ -404,11 +402,10 @@
 
             locationStatus.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> جاري الحصول على الموقع...';
 
-            // خيارات دقة عالية (أقل من 10 أمتار)
             const options = {
                 enableHighAccuracy: true,
-                timeout: 10000,        // 10 ثوانٍ كحد أقصى
-                maximumAge: 0           // لا تستخدم موقعًا مخبأً
+                timeout: 10000,
+                maximumAge: 0
             };
 
             navigator.geolocation.getCurrentPosition(
@@ -486,28 +483,39 @@
                 return;
             }
 
-            // رابط Google Apps Script (استبدله برابطك)
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbwhX5DX611BHY0oIqgTyyT6jktVks-lDFigUa6TvlngShfSO6X7vPnDxjpTP6rxKJzgog/exec'; // غيّر هذا الرابط
+            // استبدل هذا الرابط بالرابط الذي حصلت عليه من Apps Script (ينتهي بـ /exec)
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbyuJYfeoCza1vjBwIl8rQOO-SoFfOZvHysxmT88PpgLxl9A-f7WK3f0Lzy-6GpoqIqv/exec'; // ⬅️ ضع الرابط الصحيح هنا
 
             try {
                 const response = await fetch(scriptURL, {
                     method: 'POST',
-                    mode: 'no-cors',
+                    mode: 'cors',
+                    redirect: 'follow',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Content-Type': 'text/plain;charset=utf-8',
                     },
-                    body: new URLSearchParams(formData)
+                    body: JSON.stringify(formData)
                 });
 
-                showMessage('تم إرسال البيانات بنجاح!', 'success');
-                document.getElementById('dataForm').reset();
-                subcategorySelect.innerHTML = '<option value="">-- اختر التصنيف الرئيسي أولاً --</option>';
-                latitudeInput.value = '';
-                longitudeInput.value = '';
-                locationStatus.innerHTML = '<i class="fas fa-info-circle"></i> لم يتم تحديد الموقع بعد.';
+                if (!response.ok) {
+                    throw new Error(`خطأ في الشبكة: ${response.status}`);
+                }
+
+                const result = await response.json();
+                if (result.result === 'success') {
+                    showMessage('✅ تم إرسال البيانات بنجاح!', 'success');
+                    document.getElementById('dataForm').reset();
+                    // إعادة تعيين الحقول
+                    subcategorySelect.innerHTML = '<option value="">-- اختر التصنيف الرئيسي أولاً --</option>';
+                    latitudeInput.value = '';
+                    longitudeInput.value = '';
+                    locationStatus.innerHTML = '<i class="fas fa-info-circle"></i> لم يتم تحديد الموقع بعد.';
+                } else {
+                    showMessage('❌ فشل الإرسال: ' + (result.error || 'خطأ غير معروف'), 'error');
+                }
             } catch (error) {
                 console.error('Error:', error);
-                showMessage('حدث خطأ أثناء الإرسال. تأكد من إعداد الرابط بشكل صحيح.', 'error');
+                showMessage('❌ حدث خطأ: ' + error.message, 'error');
             }
         });
 
