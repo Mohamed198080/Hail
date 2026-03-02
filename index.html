@@ -6,7 +6,6 @@
     <title>نموذج تسجيل الأنشطة التجارية</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* (الأنماط كما هي سابقاً - لم تتغير) */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Tajawal', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -177,21 +176,21 @@
                 <!-- التصنيف الرئيسي -->
                 <div class="form-group">
                     <label><i class="fas fa-tags"></i> التصنيف الرئيسي</label>
-                    <select id="mainCategory" name="mainCategory">
+                    <select id="mainCategory" name="mainCategory" required>
                         <option value="">-- اختر التصنيف الرئيسي --</option>
                     </select>
                 </div>
                 <!-- التصنيف الفرعي -->
                 <div class="form-group">
                     <label><i class="fas fa-tag"></i> التصنيف الفرعي</label>
-                    <select id="subcategory" name="subcategory">
+                    <select id="subcategory" name="subcategory" required>
                         <option value="">-- اختر التصنيف الرئيسي أولاً --</option>
                     </select>
                 </div>
                 <!-- نوع العميل -->
                 <div class="form-group">
                     <label><i class="fas fa-user-tie"></i> نوع العميل</label>
-                    <select id="customerType" name="customerType">
+                    <select id="customerType" name="customerType" required>
                         <option value="">-- اختر نوع العميل --</option>
                         <option value="سكنى">سكنى</option>
                         <option value="حكومى">حكومى</option>
@@ -204,15 +203,28 @@
                     <label><i class="fas fa-file-alt"></i> رخصة النشاط التجاري</label>
                     <input type="text" id="license" name="license" placeholder="رقم الترخيص">
                 </div>
+                <!-- الميداني (حقل جديد) -->
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> الميداني</label>
+                    <select id="fieldOfficer" name="fieldOfficer" required>
+                        <option value="">-- اختر الميداني --</option>
+                        <option value="ناصر الشهيل">ناصر الشهيل</option>
+                        <option value="سعود الشقير">سعود الشقير</option>
+                        <option value="فريح الرشيدي">فريح الرشيدي</option>
+                        <option value="احمد السويدي">احمد السويدي</option>
+                        <option value="مفلح الشمري">مفلح الشمري</option>
+                        <option value="علي الرشيدان">علي الرشيدان</option>
+                    </select>
+                </div>
                 <!-- خط العرض -->
                 <div class="form-group">
                     <label><i class="fas fa-map-pin"></i> خط العرض (Latitude)</label>
-                    <input type="text" id="latitude" name="latitude" placeholder="مثال: 24.7136" readonly>
+                    <input type="text" id="latitude" name="latitude" placeholder="مثال: 24.7136" readonly required>
                 </div>
                 <!-- خط الطول -->
                 <div class="form-group">
                     <label><i class="fas fa-map-pin"></i> خط الطول (Longitude)</label>
-                    <input type="text" id="longitude" name="longitude" placeholder="مثال: 46.6753" readonly>
+                    <input type="text" id="longitude" name="longitude" placeholder="مثال: 46.6753" readonly required>
                 </div>
                 <!-- زر جلب الموقع -->
                 <div class="form-group full-width">
@@ -279,43 +291,37 @@
 
             // تعبئة التصنيف الرئيسي
             const mainCatSelect = document.getElementById('mainCategory');
-            if (mainCatSelect) {
-                for (let cat in categories) {
-                    const option = document.createElement('option');
-                    option.value = cat;
-                    option.textContent = cat;
-                    mainCatSelect.appendChild(option);
-                }
-            } else {
-                console.error('عنصر mainCategory غير موجود');
+            for (let cat in categories) {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                mainCatSelect.appendChild(option);
             }
 
             const subCatSelect = document.getElementById('subcategory');
 
             // تحديث التصنيف الفرعي
-            if (mainCatSelect) {
-                mainCatSelect.addEventListener('change', function() {
-                    const selected = this.value;
-                    subCatSelect.innerHTML = '';
-                    if (selected && categories[selected]) {
-                        const defaultOption = document.createElement('option');
-                        defaultOption.value = '';
-                        defaultOption.textContent = '-- اختر التصنيف الفرعي --';
-                        subCatSelect.appendChild(defaultOption);
-                        categories[selected].forEach(sub => {
-                            const option = document.createElement('option');
-                            option.value = sub;
-                            option.textContent = sub;
-                            subCatSelect.appendChild(option);
-                        });
-                    } else {
-                        const defaultOption = document.createElement('option');
-                        defaultOption.value = '';
-                        defaultOption.textContent = '-- اختر التصنيف الرئيسي أولاً --';
-                        subCatSelect.appendChild(defaultOption);
-                    }
-                });
-            }
+            mainCatSelect.addEventListener('change', function() {
+                const selected = this.value;
+                subCatSelect.innerHTML = '';
+                if (selected && categories[selected]) {
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = '-- اختر التصنيف الفرعي --';
+                    subCatSelect.appendChild(defaultOption);
+                    categories[selected].forEach(sub => {
+                        const option = document.createElement('option');
+                        option.value = sub;
+                        option.textContent = sub;
+                        subCatSelect.appendChild(option);
+                    });
+                } else {
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = '-- اختر التصنيف الرئيسي أولاً --';
+                    subCatSelect.appendChild(defaultOption);
+                }
+            });
 
             // ---------- جلب الموقع ----------
             const latInput = document.getElementById('latitude');
@@ -323,136 +329,124 @@
             const locationStatus = document.getElementById('locationStatus');
             const locBtn = document.getElementById('getLocationBtn');
 
-            if (locBtn) {
-                locBtn.addEventListener('click', function() {
-                    if (!navigator.geolocation) {
-                        locationStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> المتصفح لا يدعم تحديد الموقع.';
-                        return;
-                    }
-                    locationStatus.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> جاري الحصول على الموقع...';
-                    navigator.geolocation.getCurrentPosition(
-                        function(pos) {
-                            const lat = pos.coords.latitude;
-                            const lng = pos.coords.longitude;
-                            const acc = pos.coords.accuracy;
-                            latInput.value = lat.toFixed(6);
-                            lngInput.value = lng.toFixed(6);
-                            if (acc <= 10) {
-                                locationStatus.innerHTML = `<i class="fas fa-check-circle" style="color:#28a745;"></i> تم تحديد الموقع بدقة ${acc.toFixed(1)} متر (أقل من 10 أمتار).`;
-                            } else {
-                                locationStatus.innerHTML = `<i class="fas fa-exclamation-circle" style="color:#ffc107;"></i> تم تحديد الموقع بدقة ${acc.toFixed(1)} متر (قد تكون أكبر من 10 أمتار).`;
-                            }
-                        },
-                        function(err) {
-                            let msg = '';
-                            switch(err.code) {
-                                case err.PERMISSION_DENIED: msg = 'تم رفض الإذن بالوصول إلى الموقع.'; break;
-                                case err.POSITION_UNAVAILABLE: msg = 'معلومات الموقع غير متوفرة.'; break;
-                                case err.TIMEOUT: msg = 'انتهت مهلة محاولة الحصول على الموقع.'; break;
-                                default: msg = 'حدث خطأ غير معروف.';
-                            }
-                            locationStatus.innerHTML = `<i class="fas fa-times-circle" style="color:#dc3545;"></i> ${msg}`;
-                        },
-                        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-                    );
-                });
-            }
+            locBtn.addEventListener('click', function() {
+                if (!navigator.geolocation) {
+                    locationStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> المتصفح لا يدعم تحديد الموقع.';
+                    return;
+                }
+                locationStatus.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> جاري الحصول على الموقع...';
+                navigator.geolocation.getCurrentPosition(
+                    function(pos) {
+                        const lat = pos.coords.latitude;
+                        const lng = pos.coords.longitude;
+                        const acc = pos.coords.accuracy;
+                        latInput.value = lat.toFixed(6);
+                        lngInput.value = lng.toFixed(6);
+                        if (acc <= 10) {
+                            locationStatus.innerHTML = `<i class="fas fa-check-circle" style="color:#28a745;"></i> تم تحديد الموقع بدقة ${acc.toFixed(1)} متر (أقل من 10 أمتار).`;
+                        } else {
+                            locationStatus.innerHTML = `<i class="fas fa-exclamation-circle" style="color:#ffc107;"></i> تم تحديد الموقع بدقة ${acc.toFixed(1)} متر (قد تكون أكبر من 10 أمتار).`;
+                        }
+                    },
+                    function(err) {
+                        let msg = '';
+                        switch(err.code) {
+                            case err.PERMISSION_DENIED: msg = 'تم رفض الإذن بالوصول إلى الموقع.'; break;
+                            case err.POSITION_UNAVAILABLE: msg = 'معلومات الموقع غير متوفرة.'; break;
+                            case err.TIMEOUT: msg = 'انتهت مهلة محاولة الحصول على الموقع.'; break;
+                            default: msg = 'حدث خطأ غير معروف.';
+                        }
+                        locationStatus.innerHTML = `<i class="fas fa-times-circle" style="color:#dc3545;"></i> ${msg}`;
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            });
 
             // ---------- إرسال النموذج ----------
             const form = document.getElementById('dataForm');
             const messageDiv = document.getElementById('message');
 
-            if (form) {
-                form.addEventListener('submit', async function(e) {
-                    e.preventDefault(); // منع إعادة تحميل الصفحة
-                    console.log('تم استدعاء حدث الإرسال'); // للتأكد من وصول الحدث
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
 
-                    // إخفاء أي رسالة سابقة
-                    messageDiv.style.display = 'none';
-                    messageDiv.className = 'message';
+                // إخفاء أي رسالة سابقة
+                messageDiv.style.display = 'none';
+                messageDiv.className = 'message';
 
-                    // جمع البيانات
-                    const formData = {
-                        meterNumber: document.getElementById('meterNumber')?.value || '',
-                        mainCategory: document.getElementById('mainCategory')?.value || '',
-                        subcategory: document.getElementById('subcategory')?.value || '',
-                        customerType: document.getElementById('customerType')?.value || '',
-                        license: document.getElementById('license')?.value || '',
-                        needs: document.getElementById('needs')?.value || '',
-                        latitude: document.getElementById('latitude')?.value || '',
-                        longitude: document.getElementById('longitude')?.value || '',
-                        notes: document.getElementById('notes')?.value || ''
-                    };
+                // جمع البيانات
+                const formData = {
+                    meterNumber: document.getElementById('meterNumber')?.value || '',
+                    mainCategory: document.getElementById('mainCategory')?.value || '',
+                    subcategory: document.getElementById('subcategory')?.value || '',
+                    customerType: document.getElementById('customerType')?.value || '',
+                    license: document.getElementById('license')?.value || '',
+                    fieldOfficer: document.getElementById('fieldOfficer')?.value || '', // حقل الميداني الجديد
+                    latitude: document.getElementById('latitude')?.value || '',
+                    longitude: document.getElementById('longitude')?.value || '',
+                    notes: document.getElementById('notes')?.value || ''
+                };
 
-                    // التحقق الأساسي
-                    if (!formData.mainCategory) {
-                        showMessage('الرجاء اختيار التصنيف الرئيسي', 'error');
-                        return;
+                // التحقق الأساسي
+                if (!formData.mainCategory) {
+                    showMessage('الرجاء اختيار التصنيف الرئيسي', 'error');
+                    return;
+                }
+                if (!formData.subcategory) {
+                    showMessage('الرجاء اختيار التصنيف الفرعي', 'error');
+                    return;
+                }
+                if (!formData.customerType) {
+                    showMessage('الرجاء اختيار نوع العميل', 'error');
+                    return;
+                }
+                if (!formData.fieldOfficer) {
+                    showMessage('الرجاء اختيار الميداني', 'error');
+                    return;
+                }
+                if (!formData.latitude || !formData.longitude) {
+                    showMessage('الرجاء تحديد الموقع باستخدام الزر أعلاه', 'error');
+                    return;
+                }
+
+                // رابط التطبيق (استبدله برابطك)
+                const scriptURL = 'https://script.google.com/macros/s/AKfycbzZ26pduclkB12mnhXK29O1cXHCAw5e1p15lyTI9eSigjBmS3s063Qe-skJFSmHN24nKA/exec';
+
+                try {
+                    const response = await fetch(scriptURL, {
+                        method: 'POST',
+                        mode: 'cors',
+                        redirect: 'follow',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(formData)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error ${response.status}`);
                     }
-                    if (!formData.subcategory) {
-                        showMessage('الرجاء اختيار التصنيف الفرعي', 'error');
-                        return;
+
+                    const result = await response.json();
+
+                    if (result.result === 'success') {
+                        showMessage('✅ تم إرسال البيانات بنجاح!', 'success');
+                        form.reset();
+                        // إعادة تعيين القوائم وحقول الموقع
+                        subCatSelect.innerHTML = '<option value="">-- اختر التصنيف الرئيسي أولاً --</option>';
+                        latInput.value = '';
+                        lngInput.value = '';
+                        locationStatus.innerHTML = '<i class="fas fa-info-circle"></i> لم يتم تحديد الموقع بعد.';
+                    } else {
+                        showMessage('❌ فشل الإرسال: ' + (result.error || 'خطأ غير معروف'), 'error');
                     }
-                    if (!formData.customerType) {
-                        showMessage('الرجاء اختيار نوع العميل', 'error');
-                        return;
-                    }
-                    if (!formData.latitude || !formData.longitude) {
-                        showMessage('الرجاء تحديد الموقع باستخدام الزر أعلاه', 'error');
-                        return;
-                    }
-
-                    // رابط التطبيق (استبدله برابطك)
-                    const scriptURL = 'https://script.google.com/macros/s/AKfycbwDtiEyE-FJcDGF0opme8iOPWSd6dbzgOvw16kWOnZuJ8iTwwptw8RTO7qBEgNr81GZTQ/exec';
-
-                    try {
-                        console.log('سيتم الإرسال إلى:', scriptURL);
-                        const response = await fetch(scriptURL, {
-                            method: 'POST',
-                            mode: 'cors',
-                            redirect: 'follow',
-                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                            body: JSON.stringify(formData)
-                        });
-
-                        if (!response.ok) {
-                            throw new Error(`HTTP error ${response.status}`);
-                        }
-
-                        const result = await response.json();
-                        console.log('النتيجة:', result);
-
-                        if (result.result === 'success') {
-                            showMessage('✅ تم إرسال البيانات بنجاح!', 'success');
-                            form.reset();
-                            // إعادة تعيين القوائم
-                            if (subCatSelect) subCatSelect.innerHTML = '<option value="">-- اختر التصنيف الرئيسي أولاً --</option>';
-                            if (latInput) latInput.value = '';
-                            if (lngInput) lngInput.value = '';
-                            if (locationStatus) locationStatus.innerHTML = '<i class="fas fa-info-circle"></i> لم يتم تحديد الموقع بعد.';
-                        } else {
-                            showMessage('❌ فشل الإرسال: ' + (result.error || 'خطأ غير معروف'), 'error');
-                        }
-                    } catch (error) {
-                        console.error('خطأ في الإرسال:', error);
-                        showMessage('❌ حدث خطأ: ' + error.message, 'error');
-                    }
-                });
-            } else {
-                console.error('النموذج غير موجود');
-            }
+                } catch (error) {
+                    console.error('خطأ في الإرسال:', error);
+                    showMessage('❌ حدث خطأ: ' + error.message, 'error');
+                }
+            });
 
             function showMessage(text, type) {
-                if (messageDiv) {
-                    messageDiv.textContent = text;
-                    messageDiv.className = `message ${type}`;
-                } else {
-                    alert(text);
-                }
+                messageDiv.textContent = text;
+                messageDiv.className = `message ${type}`;
             }
-
-            // تأكيد تحميل الصفحة
-            console.log('السكربت تم تحميله بنجاح');
         })();
     </script>
 </body>
