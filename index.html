@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نموذج تسجيل الأنشطة التجارية</title>
+    <title>نموذج تسجيل الأنشطة التجارية </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -17,7 +17,7 @@
             padding: 20px;
         }
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             width: 100%;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -126,6 +126,11 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
         }
+        button[type="submit"]:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
         .message {
             margin-top: 20px;
             padding: 15px 20px;
@@ -156,9 +161,54 @@
         }
         .note i { color: #667eea; font-size: 14px; }
         .meter-group { grid-column: span 2; }
+        .image-group {
+            grid-column: span 2;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        .image-upload {
+            border: 2px dashed #ccc;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            background: #fafafa;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        .image-upload:hover {
+            border-color: #667eea;
+        }
+        .image-upload i {
+            font-size: 30px;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .image-upload span {
+            display: block;
+            font-size: 14px;
+            color: #555;
+        }
+        .image-upload input {
+            display: none;
+        }
+        .image-preview {
+            max-width: 100%;
+            max-height: 100px;
+            margin-top: 10px;
+            border-radius: 8px;
+            display: none;
+        }
+        .image-filename {
+            font-size: 12px;
+            color: #2c3e50;
+            margin-top: 5px;
+            word-break: break-all;
+        }
         @media (max-width: 600px) {
             .form-grid { grid-template-columns: 1fr; }
-            .full-width, .meter-group { grid-column: span 1; }
+            .full-width, .meter-group, .image-group { grid-column: span 1; }
+            .image-group { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -203,7 +253,7 @@
                     <label><i class="fas fa-file-alt"></i> رخصة النشاط التجاري</label>
                     <input type="text" id="license" name="license" placeholder="رقم الترخيص">
                 </div>
-                <!-- الميداني (حقل جديد) -->
+                <!-- الميداني -->
                 <div class="form-group">
                     <label><i class="fas fa-user"></i> الميداني</label>
                     <select id="fieldOfficer" name="fieldOfficer" required>
@@ -235,19 +285,46 @@
                         <i class="fas fa-info-circle"></i> لم يتم تحديد الموقع بعد.
                     </div>
                 </div>
+                <!-- حقل الصور (ثلاث صور) -->
+                <div class="image-group">
+                    <div class="image-upload" id="upload1" onclick="document.getElementById('image1').click()">
+                        <i class="fas fa-camera"></i>
+                        <span>الصورة 1</span>
+                        <input type="file" id="image1" accept="image/*" capture="environment">
+                        <img class="image-preview" id="preview1">
+                        <div class="image-filename" id="filename1"></div>
+                    </div>
+                    <div class="image-upload" id="upload2" onclick="document.getElementById('image2').click()">
+                        <i class="fas fa-camera"></i>
+                        <span>الصورة 2</span>
+                        <input type="file" id="image2" accept="image/*" capture="environment">
+                        <img class="image-preview" id="preview2">
+                        <div class="image-filename" id="filename2"></div>
+                    </div>
+                    <div class="image-upload" id="upload3" onclick="document.getElementById('image3').click()">
+                        <i class="fas fa-camera"></i>
+                        <span>الصورة 3</span>
+                        <input type="file" id="image3" accept="image/*" capture="environment">
+                        <img class="image-preview" id="preview3">
+                        <div class="image-filename" id="filename3"></div>
+                    </div>
+                </div>
                 <!-- الملاحظات -->
                 <div class="form-group full-width">
                     <label><i class="fas fa-pen"></i> الملاحظات</label>
                     <textarea id="notes" name="notes" placeholder="أي ملاحظات إضافية..."></textarea>
                 </div>
             </div>
-            <button type="submit"><i class="fas fa-paper-plane"></i> إرسال البيانات</button>
+            <button type="submit" id="submitBtn"><i class="fas fa-paper-plane"></i> إرسال البيانات</button>
         </form>
         <div id="message" class="message"></div>
     </div>
 
     <script>
         (function() {
+            // مفتاح API لخدمة ImgBB
+            const IMGBB_API_KEY = '943880b0a24534cdb564d3ad6ea8f3a8';
+
             // ---------- تعريف التصنيفات ----------
             const categories = {
                 "السياحة والضيافة والترفيه والتسلية": [
@@ -362,9 +439,50 @@
                 );
             });
 
+            // ---------- معاينة الصور ----------
+            function setupImageUpload(inputId, previewId, filenameId) {
+                const input = document.getElementById(inputId);
+                const preview = document.getElementById(previewId);
+                const filenameDiv = document.getElementById(filenameId);
+                input.addEventListener('change', function() {
+                    const file = this.files[0];
+                    if (file) {
+                        filenameDiv.textContent = file.name;
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            preview.src = e.target.result;
+                            preview.style.display = 'block';
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        preview.style.display = 'none';
+                        filenameDiv.textContent = '';
+                    }
+                });
+            }
+            setupImageUpload('image1', 'preview1', 'filename1');
+            setupImageUpload('image2', 'preview2', 'filename2');
+            setupImageUpload('image3', 'preview3', 'filename3');
+
+            // ---------- دالة رفع صورة إلى ImgBB ----------
+            async function uploadImage(file) {
+                const formData = new FormData();
+                formData.append('image', file);
+                const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                if (!response.ok) {
+                    throw new Error('فشل رفع الصورة');
+                }
+                const data = await response.json();
+                return data.data.url; // رابط الصورة المباشر
+            }
+
             // ---------- إرسال النموذج ----------
             const form = document.getElementById('dataForm');
             const messageDiv = document.getElementById('message');
+            const submitBtn = document.getElementById('submitBtn');
 
             form.addEventListener('submit', async function(e) {
                 e.preventDefault();
@@ -373,43 +491,77 @@
                 messageDiv.style.display = 'none';
                 messageDiv.className = 'message';
 
-                // جمع البيانات
+                // التحقق الأساسي
+                const mainCategory = document.getElementById('mainCategory').value;
+                const subcategory = document.getElementById('subcategory').value;
+                const customerType = document.getElementById('customerType').value;
+                const fieldOfficer = document.getElementById('fieldOfficer').value;
+                const latitude = document.getElementById('latitude').value;
+                const longitude = document.getElementById('longitude').value;
+
+                if (!mainCategory) return showMessage('الرجاء اختيار التصنيف الرئيسي', 'error');
+                if (!subcategory) return showMessage('الرجاء اختيار التصنيف الفرعي', 'error');
+                if (!customerType) return showMessage('الرجاء اختيار نوع العميل', 'error');
+                if (!fieldOfficer) return showMessage('الرجاء اختيار الميداني', 'error');
+                if (!latitude || !longitude) return showMessage('الرجاء تحديد الموقع باستخدام الزر أعلاه', 'error');
+
+                // تعطيل الزر وتغيير النص
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> جاري رفع الصور وإرسال البيانات...';
+
+                // جمع الصور المرفوعة
+                const imageInputs = [
+                    document.getElementById('image1'),
+                    document.getElementById('image2'),
+                    document.getElementById('image3')
+                ];
+
+                const uploadPromises = imageInputs.map(input => {
+                    if (input.files.length > 0) {
+                        return uploadImage(input.files[0]).catch(err => {
+                            console.error('خطأ في رفع الصورة:', err);
+                            return null; // في حال فشل الرفع نعيد null
+                        });
+                    } else {
+                        return Promise.resolve(''); // لا يوجد صورة
+                    }
+                });
+
+                // انتظار رفع جميع الصور
+                let imageUrls;
+                try {
+                    imageUrls = await Promise.all(uploadPromises);
+                } catch (error) {
+                    showMessage('❌ فشل في رفع الصور: ' + error.message, 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال البيانات';
+                    return;
+                }
+
+                // إذا فشل رفع أي صورة (باستثناء الفارغة) نعطي تحذيراً لكن نكمل مع الصور الناجحة
+                const failedUploads = imageUrls.filter((url, index) => url === null && imageInputs[index].files.length > 0);
+                if (failedUploads.length > 0) {
+                    showMessage(`⚠️ فشل رفع ${failedUploads.length} صورة، سيتم إرسال البيانات بدونها.`, 'error');
+                }
+
+                // تجهيز بيانات النموذج
                 const formData = {
-                    meterNumber: document.getElementById('meterNumber')?.value || '',
-                    mainCategory: document.getElementById('mainCategory')?.value || '',
-                    subcategory: document.getElementById('subcategory')?.value || '',
-                    customerType: document.getElementById('customerType')?.value || '',
-                    license: document.getElementById('license')?.value || '',
-                    fieldOfficer: document.getElementById('fieldOfficer')?.value || '', // حقل الميداني الجديد
-                    latitude: document.getElementById('latitude')?.value || '',
-                    longitude: document.getElementById('longitude')?.value || '',
-                    notes: document.getElementById('notes')?.value || ''
+                    meterNumber: document.getElementById('meterNumber').value || '',
+                    mainCategory: mainCategory,
+                    subcategory: subcategory,
+                    customerType: customerType,
+                    license: document.getElementById('license').value || '',
+                    fieldOfficer: fieldOfficer,
+                    latitude: latitude,
+                    longitude: longitude,
+                    notes: document.getElementById('notes').value || '',
+                    image1: imageUrls[0] || '',
+                    image2: imageUrls[1] || '',
+                    image3: imageUrls[2] || ''
                 };
 
-                // التحقق الأساسي
-                if (!formData.mainCategory) {
-                    showMessage('الرجاء اختيار التصنيف الرئيسي', 'error');
-                    return;
-                }
-                if (!formData.subcategory) {
-                    showMessage('الرجاء اختيار التصنيف الفرعي', 'error');
-                    return;
-                }
-                if (!formData.customerType) {
-                    showMessage('الرجاء اختيار نوع العميل', 'error');
-                    return;
-                }
-                if (!formData.fieldOfficer) {
-                    showMessage('الرجاء اختيار الميداني', 'error');
-                    return;
-                }
-                if (!formData.latitude || !formData.longitude) {
-                    showMessage('الرجاء تحديد الموقع باستخدام الزر أعلاه', 'error');
-                    return;
-                }
-
                 // رابط التطبيق (استبدله برابطك)
-                const scriptURL = 'https://script.google.com/macros/s/AKfycbzZ26pduclkB12mnhXK29O1cXHCAw5e1p15lyTI9eSigjBmS3s063Qe-skJFSmHN24nKA/exec';
+                const scriptURL = 'https://script.google.com/macros/s/AKfycbxBn09wyq9SXbNQc_E7M4153bdEqwljVo7TXiz8YBGfmxYsq0JonyhW_sa_YQPd6hWODA/exec';
 
                 try {
                     const response = await fetch(scriptURL, {
@@ -429,17 +581,28 @@
                     if (result.result === 'success') {
                         showMessage('✅ تم إرسال البيانات بنجاح!', 'success');
                         form.reset();
-                        // إعادة تعيين القوائم وحقول الموقع
+                        // إعادة تعيين القوائم وحقول الموقع ومعاينات الصور
                         subCatSelect.innerHTML = '<option value="">-- اختر التصنيف الرئيسي أولاً --</option>';
                         latInput.value = '';
                         lngInput.value = '';
                         locationStatus.innerHTML = '<i class="fas fa-info-circle"></i> لم يتم تحديد الموقع بعد.';
+                        // إخفاء معاينات الصور
+                        document.getElementById('preview1').style.display = 'none';
+                        document.getElementById('preview2').style.display = 'none';
+                        document.getElementById('preview3').style.display = 'none';
+                        document.getElementById('filename1').textContent = '';
+                        document.getElementById('filename2').textContent = '';
+                        document.getElementById('filename3').textContent = '';
                     } else {
                         showMessage('❌ فشل الإرسال: ' + (result.error || 'خطأ غير معروف'), 'error');
                     }
                 } catch (error) {
                     console.error('خطأ في الإرسال:', error);
                     showMessage('❌ حدث خطأ: ' + error.message, 'error');
+                } finally {
+                    // إعادة تمكين الزر
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال البيانات';
                 }
             });
 
